@@ -6,16 +6,17 @@
         $email = $_POST['email'];
         $course = $_POST['course'];
 
-        $sql = "INSERT INTO students (name,email,course) 
-            VALUES('$name','$email','$course')";
-        $result = $conn ->query($sql);
-        if($result){
-            echo "Student added Succesfully!<br><br>";
+        $stmt = $conn->prepare(
+            "INSERT INTO students(name,email,course) 
+            Values(?,?,?)"
+        );
+        $stmt->bind_param("sss",$name,$email,$course);
+        if($stmt->execute()){
+        echo "Student added Successfully!<br><br>";
+        } else {
+        echo "Error: " . $stmt->error;
         }
-        else{
-            echo "Error: " . $conn->error;
-        }
-        
+        $stmt->close();
     }
     
     

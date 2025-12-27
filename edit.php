@@ -3,9 +3,13 @@ include "db.php";
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-    $sql = "SELECT * FROM students WHERE id = $id";
-    $result = $conn->query($sql);
+    $stmt = $conn->prepare("SELECT * FROM students WHERE id=?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
     $student = $result->fetch_assoc();
+    $stmt->close();
+
 }
 
 if (isset($_POST['update'])) {
@@ -14,16 +18,20 @@ if (isset($_POST['update'])) {
     $email = $_POST['email'];
     $course = $_POST['course'];
 
-    $sql = "UPDATE students 
-            SET name='$name', email='$email', course='$course' 
-            WHERE id=$id";
-
-    if ($conn->query($sql)) {
+    $stmt = $conn -> prepare(
+            " UPDATE students
+            SET name=?, email=?, course=? 
+            WHERE id=?"
+    );
+    $stmt->bind_param("sssi",$name,$email,$course,$id);
+    if ($stmt->execute()) {
         header("Location: index.php");
         exit();
     } else {
-        echo "Error updating record: " . $conn->error;
+        echo "Error updating record: " . $stmt->error;
     }
+    $stmt->close();
+
 }
 ?>
 
